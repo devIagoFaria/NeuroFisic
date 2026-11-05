@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}
+Avaliações | NeuroPsico
+{% endblock %}
+
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <p class="page-eyebrow">
+            AVALIAÇÕES
+        </p>
+
+        <h1>Avaliações</h1>
+
+        <p>
+            Consulte e gerencie as avaliações neuropsicológicas registradas.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('avaliacoes.nova') }}"
+        class="button-primary"
+    >
+
+        <svg viewBox="0 0 24 24" fill="none">
+
+            <path
+                d="M12 5V19M5 12H19"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+            />
+
+        </svg>
+
+        Nova avaliação
+
+    </a>
+
+</header>
+
+
+<section class="page-container">
+
+    <div class="table-card">
+
+        {% if avaliacoes %}
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Data</th>
+                        <th>Queixa atual</th>
+                        <th>Testes</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for avaliacao in avaliacoes %}
+
+                        <tr>
+
+                            <td class="patient-name">
+                                {{ avaliacao.paciente.nome }}
+                            </td>
+
+
+                            <td class="table-muted">
+
+                                {{ avaliacao.data.strftime('%d/%m/%Y') }}
+
+                            </td>
+
+
+                            <td class="table-muted">
+
+                                {% if avaliacao.queixa_atual %}
+
+                                    {{ avaliacao.queixa_atual[:60] }}
+
+                                    {% if avaliacao.queixa_atual|length > 60 %}
+                                        ...
+                                    {% endif %}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="test-status-list">
+
+                                    <span class="test-status {% if avaliacao.ravlt %}completed{% endif %}">
+                                        RAVLT
+                                    </span>
+
+                                    <span class="test-status {% if avaliacao.tmt %}completed{% endif %}">
+                                        TMT
+                                    </span>
+
+                                    <span class="test-status {% if avaliacao.fluencia_verbal %}completed{% endif %}">
+                                        Fluência
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+                                    class="table-action"
+                                >
+                                    Visualizar
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+
+            <div class="list-empty">
+
+                <h3>
+                    Nenhuma avaliação registrada
+                </h3>
+
+                <p>
+                    Crie a primeira avaliação para começar
+                    a registrar os resultados dos testes.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,1 @@
+from app.seeds.profissional_seed import criar_profissional_padrao

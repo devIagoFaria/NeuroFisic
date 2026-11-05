@@ -1,0 +1,450 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Correlações | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <a
+            href="{{ url_for('analises.index') }}"
+            class="back-link"
+        >
+            ← Voltar para análises
+        </a>
+
+        <p class="page-eyebrow">
+            MECANISMO DE ANÁLISE
+        </p>
+
+        <h1>Correlações</h1>
+
+        <p>
+            Investigue associações entre resultados
+            dos testes neuropsicológicos.
+        </p>
+
+    </div>
+
+</header>
+
+
+<section class="page-container">
+
+    <!-- FORMULÁRIO -->
+    <div class="detail-card correlation-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Configurar análise</h2>
+                <p>
+                    Selecione duas métricas e
+                    o método estatístico.
+                </p>
+            </div>
+
+        </div>
+
+        <form method="POST" class="correlation-form">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <div class="correlation-fields-grid">
+
+                <!-- PRIMEIRA MÉTRICA -->
+                <div class="form-group">
+
+                    <label for="variavel_x">
+                        Primeira métrica
+                    </label>
+
+                    <select
+                        id="variavel_x"
+                        name="variavel_x"
+                        required
+                    >
+
+                        {% for grupo, metricas in grupos_metricas.items() %}
+
+                            <optgroup label="{{ grupo }}">
+
+                                {% for coluna, nome in metricas.items() %}
+
+                                    <option
+                                        value="{{ coluna }}"
+                                        {% if variavel_x == coluna %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ nome }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </optgroup>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- SEGUNDA MÉTRICA -->
+                <div class="form-group">
+
+                    <label for="variavel_y">
+                        Segunda métrica
+                    </label>
+
+                    <select
+                        id="variavel_y"
+                        name="variavel_y"
+                        required
+                    >
+
+                        {% for grupo, metricas in grupos_metricas.items() %}
+
+                            <optgroup label="{{ grupo }}">
+
+                                {% for coluna, nome in metricas.items() %}
+
+                                    <option
+                                        value="{{ coluna }}"
+                                        {% if variavel_y == coluna %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ nome }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </optgroup>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- MÉTODO -->
+            <div class="form-group correlation-method">
+
+                <label>Método estatístico</label>
+
+                <div class="correlation-radio-group">
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="metodo"
+                            value="spearman"
+                            {% if metodo == 'spearman' %}
+                                checked
+                            {% endif %}
+                        >
+                        Spearman
+                    </label>
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="metodo"
+                            value="pearson"
+                            {% if metodo == 'pearson' %}
+                                checked
+                            {% endif %}
+                        >
+                        Pearson
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- FILTRO DE FLUÊNCIA -->
+            <div
+                id="filtrosFluencia"
+                class="correlation-fluency-filters"
+                hidden
+            >
+
+                <h3>Protocolo de Fluência Verbal</h3>
+
+                <p>
+                    Preencha quando alguma das métricas
+                    selecionadas for de Fluência Verbal.
+                </p>
+
+                <div class="correlation-fields-grid">
+
+                    <div class="form-group">
+
+                        <label for="fluencia_tipo">
+                            Tipo
+                        </label>
+
+                        <select
+                            id="fluencia_tipo"
+                            name="fluencia_tipo"
+                        >
+
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option
+                                value="Semântica"
+                                {% if fluencia_tipo == 'Semântica' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Semântica
+                            </option>
+
+                            <option
+                                value="Fonêmica"
+                                {% if fluencia_tipo == 'Fonêmica' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Fonêmica
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="fluencia_categoria">
+                            Categoria ou letra
+                        </label>
+
+                        <input
+                            type="text"
+                            id="fluencia_categoria"
+                            name="fluencia_categoria"
+                            value="{{ fluencia_categoria }}"
+                            placeholder="Ex.: Animais ou F"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="button-primary"
+                >
+                    Calcular correlação
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- RESULTADOS -->
+    {% if resultado %}
+
+        <div class="detail-card correlation-result-card">
+
+            <div class="detail-card-header">
+
+                <div>
+                    <p class="page-eyebrow">
+                        RESULTADO ESTATÍSTICO
+                    </p>
+
+                    <h2>
+                        {{ resultado.nome_x }}
+                        ×
+                        {{ resultado.nome_y }}
+                    </h2>
+
+                    <p>
+                        Método:
+                        {{ resultado.metodo|capitalize }}
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="correlation-result-grid">
+
+                <div class="correlation-result-item">
+
+                    <span>Coeficiente</span>
+
+                    <strong>
+                        {{ "%.3f"|format(resultado.coeficiente) }}
+                    </strong>
+
+                </div>
+
+                <div class="correlation-result-item">
+
+                    <span>Observações (N)</span>
+
+                    <strong>
+                        {{ resultado.n }}
+                    </strong>
+
+                </div>
+
+                <div class="correlation-result-item">
+
+                    <span>Valor-p</span>
+
+                    <strong>
+                        {% if resultado.valor_p is none %}
+                            —
+                        {% elif resultado.valor_p < 0.001 %}
+                            &lt; 0,001
+                        {% else %}
+                            {{ "%.4f"|format(resultado.valor_p) }}
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="correlation-interpretation">
+
+                <h3>Interpretação descritiva</h3>
+
+                <p>
+                    Foi observada uma associação
+                    <strong>
+                        {{ resultado.intensidade }}
+                        e {{ resultado.direcao }}
+                    </strong>
+                    entre as métricas selecionadas,
+                    considerando os
+                    {{ resultado.n }}
+                    pares válidos disponíveis.
+                </p>
+
+                <p>
+                    Esse resultado descreve uma associação
+                    estatística e não estabelece relação
+                    causal ou diagnóstico clínico.
+                </p>
+
+                {% if resultado.n < 10 %}
+                    <p>
+                        <strong>Atenção:</strong>
+                        o número de observações é pequeno.
+                        Interprete o resultado com cautela.
+                    </p>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        {% if grafico_dispersao %}
+
+            <div class="detail-card correlation-chart-card">
+
+                <div class="detail-card-header">
+
+                    <div>
+                        <h2>Gráfico de dispersão</h2>
+
+                        <p>
+                            Relação entre as duas métricas
+                            selecionadas.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="analysis-chart-container">
+                    {{ grafico_dispersao | safe }}
+                </div>
+
+                <div class="analysis-chart-footer">
+                    Cada ponto representa um par válido
+                    utilizado no cálculo da correlação.
+                </div>
+
+            </div>
+
+        {% endif %}
+
+
+    {% endif %}
+
+</section>
+
+
+<script>
+    const campoX = document.getElementById("variavel_x");
+    const campoY = document.getElementById("variavel_y");
+
+    const filtros = document.getElementById(
+        "filtrosFluencia"
+    );
+
+    const tipo = document.getElementById(
+        "fluencia_tipo"
+    );
+
+    const categoria = document.getElementById(
+        "fluencia_categoria"
+    );
+
+    function atualizarFiltrosFluencia() {
+
+        const envolveFluencia =
+            campoX.value.startsWith("fluencia_") ||
+            campoY.value.startsWith("fluencia_");
+
+        filtros.hidden = !envolveFluencia;
+
+        tipo.required = envolveFluencia;
+        categoria.required = envolveFluencia;
+    }
+
+    campoX.addEventListener(
+        "change",
+        atualizarFiltrosFluencia
+    );
+
+    campoY.addEventListener(
+        "change",
+        atualizarFiltrosFluencia
+    );
+
+    atualizarFiltrosFluencia();
+</script>
+
+{% endblock %}

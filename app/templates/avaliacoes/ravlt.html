@@ -1,0 +1,208 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+RAVLT | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+    <div>
+        <a
+            href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+            class="back-link"
+        >
+            ← Voltar para avaliação
+        </a>
+
+        <p class="page-eyebrow">TESTE NEUROPSICOLÓGICO</p>
+        <h1>RAVLT</h1>
+
+        <p>
+            Registro dos resultados do Teste de
+            Aprendizagem Auditivo-Verbal de Rey.
+        </p>
+    </div>
+</header>
+
+<section class="page-container">
+
+    <div class="ravlt-patient-bar">
+        <div>
+            <span class="detail-label">PACIENTE</span>
+            <strong>{{ avaliacao.paciente.nome }}</strong>
+        </div>
+
+        <div>
+            <span class="detail-label">DATA DA AVALIAÇÃO</span>
+            <strong>
+                {{ avaliacao.data.strftime('%d/%m/%Y') }}
+            </strong>
+        </div>
+
+        <div>
+            <span class="test-status {% if ravlt %}completed{% endif %}">
+                {% if ravlt %}
+                    Registrado
+                {% else %}
+                    Não registrado
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <form method="POST" class="form-card ravlt-form-card">
+
+        <div class="form-section">
+            <p class="page-eyebrow">ETAPA 01</p>
+            <h2 class="form-section-title">
+                Aprendizagem — Lista A
+            </h2>
+
+            <p class="ravlt-section-description">
+                Registre a quantidade de palavras recordadas
+                em cada tentativa.
+            </p>
+
+            <div class="ravlt-fields-grid">
+
+                {% for numero in range(1, 6) %}
+
+                {% set campo = 'quantidade_a' ~ numero %}
+
+                <div class="form-group">
+                    <label for="{{ campo }}">
+                        Tentativa A{{ numero }}
+                    </label>
+
+                    <input
+                        type="number"
+                        id="{{ campo }}"
+                        name="{{ campo }}"
+                        min="0"
+                        max="15"
+                        placeholder="0 a 15"
+                        value="{{ request.form.get(campo, ravlt|attr(campo) if ravlt else '') if request.method == 'POST' else (ravlt|attr(campo) if ravlt and ravlt|attr(campo) is not none else '') }}"
+                    >
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <div class="form-section">
+            <p class="page-eyebrow">ETAPA 02</p>
+            <h2 class="form-section-title">
+                Interferência e evocação
+            </h2>
+
+            <p class="ravlt-section-description">
+                Registre os resultados da lista de interferência,
+                evocação após interferência e evocação tardia.
+            </p>
+
+            <div class="ravlt-fields-grid">
+
+                {% for campo, titulo in [
+                    ('quantidade_lista_b', 'Lista B'),
+                    ('quantidade_a6', 'A6 — Após interferência'),
+                    ('quantidade_a7', 'A7 — Evocação tardia')
+                ] %}
+
+                <div class="form-group">
+                    <label for="{{ campo }}">
+                        {{ titulo }}
+                    </label>
+
+                    <input
+                        type="number"
+                        id="{{ campo }}"
+                        name="{{ campo }}"
+                        min="0"
+                        max="15"
+                        placeholder="0 a 15"
+                        value="{{ request.form.get(campo, ravlt|attr(campo) if ravlt else '') if request.method == 'POST' else (ravlt|attr(campo) if ravlt and ravlt|attr(campo) is not none else '') }}"
+                    >
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <div class="form-section">
+            <p class="page-eyebrow">ETAPA 03</p>
+            <h2 class="form-section-title">
+                Reconhecimento
+            </h2>
+
+            <div class="ravlt-fields-grid">
+
+                <div class="form-group">
+                    <label for="reconhecimento">
+                        Resultado do reconhecimento
+                    </label>
+
+                    <input
+                        type="number"
+                        id="reconhecimento"
+                        name="reconhecimento"
+                        min="0"
+                        placeholder="Informe o escore"
+                        value="{{ request.form.get('reconhecimento', ravlt.reconhecimento if ravlt else '') if request.method == 'POST' else (ravlt.reconhecimento if ravlt and ravlt.reconhecimento is not none else '') }}"
+                    >
+                </div>
+
+            </div>
+
+            <p class="ravlt-section-description">
+                Utilize o critério de pontuação do protocolo
+                adotado pelo profissional.
+            </p>
+        </div>
+
+        <div class="form-section">
+            <p class="page-eyebrow">ETAPA 04</p>
+            <h2 class="form-section-title">
+                Observações
+            </h2>
+
+            <div class="form-group">
+                <label for="observacao">
+                    Anotações complementares
+                </label>
+
+                <textarea
+                    id="observacao"
+                    name="observacao"
+                    rows="4"
+                    placeholder="Registre observações relevantes..."
+                >{{ request.form.get('observacao', ravlt.observacao or '' if ravlt else '') }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a
+                href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+                class="button-secondary"
+            >
+                Cancelar
+            </a>
+
+            <button type="submit" class="button-primary">
+                {% if ravlt %}
+                    Salvar alterações
+                {% else %}
+                    Salvar resultados
+                {% endif %}
+            </button>
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    </form>
+
+</section>
+
+{% endblock %}

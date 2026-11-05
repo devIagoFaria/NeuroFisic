@@ -1,0 +1,444 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Agrupamentos | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <a
+            href="{{ url_for('analises.index') }}"
+            class="back-link"
+        >
+            ← Voltar para análises
+        </a>
+
+        <p class="page-eyebrow">
+            MECANISMO DE ANÁLISE
+        </p>
+
+        <h1>Identificação de padrões</h1>
+
+        <p>
+            Explore agrupamentos de avaliações
+            com resultados semelhantes.
+        </p>
+
+    </div>
+
+</header>
+
+
+<section class="page-container">
+
+    <!-- CONFIGURAÇÃO -->
+    <div class="detail-card grouping-card">
+
+        <div class="detail-card-header">
+            <div>
+                <h2>Configurar agrupamento</h2>
+
+                <p>
+                    Selecione pelo menos duas métricas
+                    e a quantidade de grupos.
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" class="grouping-form">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <div class="form-group">
+
+                <label>Métricas para análise</label>
+
+                <div class="grouping-metrics-grid">
+
+                    {% for coluna, nome in metricas_disponiveis.items() %}
+
+                        <label class="grouping-metric-option">
+
+                            <input
+                                type="checkbox"
+                                name="metricas"
+                                value="{{ coluna }}"
+                                {% if coluna in metricas_selecionadas %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <span>{{ nome }}</span>
+
+                        </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group grouping-count-field">
+
+                <label for="quantidade_grupos">
+                    Quantidade de grupos
+                </label>
+
+                <select
+                    id="quantidade_grupos"
+                    name="quantidade_grupos"
+                >
+
+                    {% for numero in range(2, 7) %}
+
+                        <option
+                            value="{{ numero }}"
+                            {% if quantidade_grupos|string == numero|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ numero }} grupos
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <p class="form-help">
+                    O algoritmo buscará formar a
+                    quantidade selecionada de grupos.
+                </p>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="button-primary"
+                >
+                    Identificar padrões
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- RESULTADO -->
+    {% if resultado %}
+
+        <div class="grouping-summary-grid">
+
+            <div class="analysis-summary-card">
+                <span>Avaliações analisadas</span>
+                <strong>
+                    {{ resultado.quantidade_registros }}
+                </strong>
+            </div>
+
+            <div class="analysis-summary-card">
+                <span>Grupos identificados</span>
+                <strong>
+                    {{ resultado.quantidade_grupos }}
+                </strong>
+            </div>
+
+            <div class="analysis-summary-card">
+                <span>Coeficiente de silhueta</span>
+                <strong>
+                    {{ "%.3f"|format(resultado.silhueta) }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <!-- CARACTERÍSTICAS DOS GRUPOS -->
+        <div class="detail-card grouping-result-card">
+
+            <div class="detail-card-header">
+
+                <div>
+                    <h2>Características dos grupos</h2>
+
+                    <p>
+                        Médias das métricas selecionadas
+                        em cada agrupamento.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="analysis-table-wrapper">
+
+                <table class="analysis-table">
+
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Avaliações</th>
+
+                            {% for metrica in resultado.metricas %}
+                                <th>
+                                    {{ resultado.nomes_metricas[metrica] }}
+                                </th>
+                            {% endfor %}
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for grupo in resultado.resumo %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        Grupo {{ grupo.grupo }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ grupo.quantidade }}
+                                </td>
+
+                                {% for metrica in resultado.metricas %}
+
+                                    <td>
+                                        {{ "%.2f"|format(grupo.medias[metrica]) }}
+                                    </td>
+
+                                {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- Visualização dos agrupamentos -->
+        {% if resultado and resultado.registros %}
+            <section class="card mb-4">
+                <div class="card-body">
+                    <div class="agrupamento-header">
+                        <div class="agrupamento-header-texto">
+                            <h3>Visualização dos agrupamentos</h3>
+                            <p>
+                                Explore a distribuição das avaliações entre os grupos
+                                identificados pelo K-Means. Selecione as métricas
+                                para comparar os resultados.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="agrupamento-filtros">
+                        <div class="agrupamento-campo">
+                            <label for="eixoX">Métrica do eixo X</label>
+                            <select id="eixoX" class="agrupamento-select"></select>
+                        </div>
+
+                        <div class="agrupamento-campo">
+                            <label for="eixoY">Métrica do eixo Y</label>
+                            <select id="eixoY" class="agrupamento-select"></select>
+                        </div>
+                    </div>
+
+                    <div id="graficoAgrupamentos"
+                        style="width: 100%; min-height: 450px;">
+                    </div>
+                </div>
+            </section>
+
+            <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const registros = {{ resultado.registros | tojson }};
+                const metricas = {{ resultado.metricas | tojson }};
+                const nomes = {{ resultado.nomes_metricas | tojson }};
+
+                const eixoX = document.getElementById("eixoX");
+                const eixoY = document.getElementById("eixoY");
+
+                metricas.forEach(metrica => {
+                    eixoX.add(new Option(nomes[metrica], metrica));
+                    eixoY.add(new Option(nomes[metrica], metrica));
+                });
+
+                eixoX.selectedIndex = 0;
+                eixoY.selectedIndex = 1;
+
+                function atualizarGrafico() {
+                    const x = eixoX.value;
+                    const y = eixoY.value;
+
+                    const grupos = [...new Set(
+                        registros.map(r => r.grupo)
+                    )].sort((a, b) => a - b);
+
+                    const traces = grupos.map(grupo => {
+                        const avaliacoes = registros.filter(
+                            r => r.grupo === grupo
+                        );
+
+                        return {
+                            x: avaliacoes.map(r => r.valores[x]),
+                            y: avaliacoes.map(r => r.valores[y]),
+                            text: avaliacoes.map(
+                                r => `Avaliação #${r.avaliacao_id}`
+                            ),
+                            type: "scatter",
+                            mode: "markers",
+                            name: `Grupo ${grupo}`,
+                            marker: {
+                                size: 11,
+                                opacity: 0.8
+                            },
+                            hovertemplate:
+                                "%{text}<br>" +
+                                nomes[x] + ": %{x}<br>" +
+                                nomes[y] + ": %{y}<br>" +
+                                `Grupo ${grupo}` +
+                                "<extra></extra>"
+                        };
+                    });
+
+                    Plotly.react(
+                        "graficoAgrupamentos",
+                        traces,
+                        {
+                            xaxis: { title: { text: nomes[x] } },
+                            yaxis: { title: { text: nomes[y] } },
+                            hovermode: "closest",
+                            legend: { orientation: "h" },
+                            margin: { t: 30, b: 75 },
+                            autosize: true
+                        },
+                        { responsive: true }
+                    );
+                }
+
+                eixoX.addEventListener("change", atualizarGrafico);
+                eixoY.addEventListener("change", atualizarGrafico);
+
+                atualizarGrafico();
+            });
+            </script>
+        {% endif %}
+
+
+        <!-- REGISTROS AGRUPADOS -->
+        <div class="detail-card grouping-result-card">
+
+            <div class="detail-card-header">
+
+                <div>
+                    <h2>Avaliações agrupadas</h2>
+
+                    <p>
+                        Confira o grupo atribuído
+                        a cada avaliação.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="analysis-table-wrapper">
+
+                <table class="analysis-table">
+
+                    <thead>
+                        <tr>
+                            <th>Avaliação</th>
+                            <th>Grupo</th>
+
+                            {% for metrica in resultado.metricas %}
+                                <th>
+                                    {{ resultado.nomes_metricas[metrica] }}
+                                </th>
+                            {% endfor %}
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for registro in resultado.registros %}
+
+                            <tr>
+
+                                <td>
+                                    <a
+                                        href="{{ url_for('avaliacoes.visualizar', avaliacao_id=registro.avaliacao_id) }}"
+                                    >
+                                        #{{ registro.avaliacao_id }}
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <span class="grouping-badge">
+                                        Grupo {{ registro.grupo }}
+                                    </span>
+                                </td>
+
+                                {% for metrica in resultado.metricas %}
+
+                                    <td>
+                                        {{ "%.2f"|format(registro.valores[metrica]) }}
+                                    </td>
+
+                                {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <div class="grouping-notice">
+
+            <strong>Interpretação dos resultados</strong>
+
+            <p>
+                Os grupos representam semelhanças
+                matemáticas entre as métricas selecionadas.
+                Não constituem categorias diagnósticas
+                nem substituem a avaliação profissional.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

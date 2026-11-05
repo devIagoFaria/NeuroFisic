@@ -1,0 +1,287 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Fluência Verbal | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <a
+            href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+            class="back-link"
+        >
+            ← Voltar para avaliação
+        </a>
+
+        <p class="page-eyebrow">
+            TESTE NEUROPSICOLÓGICO
+        </p>
+
+        <h1>Fluência Verbal</h1>
+
+        <p>
+            Registro dos resultados de produção verbal.
+        </p>
+
+    </div>
+
+</header>
+
+
+<section class="page-container">
+
+    <div class="ravlt-patient-bar">
+
+        <div>
+            <span class="detail-label">PACIENTE</span>
+            <strong>{{ avaliacao.paciente.nome }}</strong>
+        </div>
+
+        <div>
+            <span class="detail-label">DATA DA AVALIAÇÃO</span>
+
+            <strong>
+                {{ avaliacao.data.strftime('%d/%m/%Y') }}
+            </strong>
+        </div>
+
+        <div>
+            <span class="test-status {% if fluencia %}completed{% endif %}">
+                {% if fluencia %}
+                    Registrado
+                {% else %}
+                    Não registrado
+                {% endif %}
+            </span>
+        </div>
+
+    </div>
+
+
+    <form method="POST" class="form-card ravlt-form-card">
+
+        <!-- IDENTIFICAÇÃO -->
+        <div class="form-section">
+
+            <p class="page-eyebrow">ETAPA 01</p>
+
+            <h2 class="form-section-title">
+                Identificação do teste
+            </h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="tipo">
+                        Tipo de fluência *
+                    </label>
+
+                    {% set tipo_atual = request.form.get('tipo', fluencia.tipo if fluencia else '') %}
+
+                    <select id="tipo" name="tipo" required>
+
+                        <option value="">
+                            Selecione
+                        </option>
+
+                        <option
+                            value="Semântica"
+                            {% if tipo_atual == 'Semântica' %}selected{% endif %}
+                        >
+                            Semântica
+                        </option>
+
+                        <option
+                            value="Fonêmica"
+                            {% if tipo_atual == 'Fonêmica' %}selected{% endif %}
+                        >
+                            Fonêmica
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="categoria">
+                        Categoria ou letra *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="categoria"
+                        name="categoria"
+                        placeholder="Ex.: Animais ou letra F"
+                        value="{{ request.form.get('categoria', fluencia.categoria or '' if fluencia else '') }}"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESULTADOS -->
+        <div class="form-section">
+
+            <p class="page-eyebrow">ETAPA 02</p>
+
+            <h2 class="form-section-title">
+                Resultados gerais
+            </h2>
+
+            <p class="ravlt-section-description">
+                Informe as quantidades registradas durante
+                a aplicação do teste.
+            </p>
+
+            <div class="ravlt-fields-grid">
+
+                {% for campo, titulo in [
+                    ('total_palavras', 'Total de palavras'),
+                    ('palavras_validas', 'Palavras válidas'),
+                    ('repeticoes', 'Repetições'),
+                    ('intrusoes', 'Intrusões')
+                ] %}
+
+                <div class="form-group">
+
+                    <label for="{{ campo }}">
+                        {{ titulo }}
+                    </label>
+
+                    {% set valor = fluencia|attr(campo) if fluencia else none %}
+
+                    <input
+                        type="number"
+                        id="{{ campo }}"
+                        name="{{ campo }}"
+                        min="0"
+                        step="1"
+                        placeholder="0"
+                        value="{{ request.form.get(campo, valor if valor is not none else '') }}"
+                    >
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- DISTRIBUIÇÃO TEMPORAL -->
+        <div class="form-section">
+
+            <p class="page-eyebrow">ETAPA 03</p>
+
+            <h2 class="form-section-title">
+                Distribuição temporal
+            </h2>
+
+            <p class="ravlt-section-description">
+                Registre a quantidade de palavras produzidas
+                em cada intervalo de 15 segundos, caso essa
+                informação esteja disponível.
+            </p>
+
+            <div class="ravlt-fields-grid">
+
+                {% for campo, titulo in [
+                    ('intervalo_1', '0–15 segundos'),
+                    ('intervalo_2', '16–30 segundos'),
+                    ('intervalo_3', '31–45 segundos'),
+                    ('intervalo_4', '46–60 segundos')
+                ] %}
+
+                <div class="form-group">
+
+                    <label for="{{ campo }}">
+                        {{ titulo }}
+                    </label>
+
+                    {% set valor = fluencia|attr(campo) if fluencia else none %}
+
+                    <input
+                        type="number"
+                        id="{{ campo }}"
+                        name="{{ campo }}"
+                        min="0"
+                        step="1"
+                        placeholder="0"
+                        value="{{ request.form.get(campo, valor if valor is not none else '') }}"
+                    >
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- OBSERVAÇÕES -->
+        <div class="form-section">
+
+            <p class="page-eyebrow">ETAPA 04</p>
+
+            <h2 class="form-section-title">
+                Observações
+            </h2>
+
+            <div class="form-group">
+
+                <label for="observacao">
+                    Anotações complementares
+                </label>
+
+                <textarea
+                    id="observacao"
+                    name="observacao"
+                    rows="4"
+                    placeholder="Registre observações sobre o desempenho..."
+                >{{ request.form.get('observacao', fluencia.observacao or '' if fluencia else '') }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+                class="button-secondary"
+            >
+                Cancelar
+            </a>
+
+            <button type="submit" class="button-primary">
+
+                {% if fluencia %}
+                    Salvar alterações
+                {% else %}
+                    Salvar resultados
+                {% endif %}
+
+            </button>
+
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    </form>
+
+</section>
+
+{% endblock %}

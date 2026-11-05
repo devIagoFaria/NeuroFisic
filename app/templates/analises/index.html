@@ -1,0 +1,403 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Painel de Análises | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+        <p class="page-eyebrow">
+            MECANISMO DE ANÁLISE
+        </p>
+
+        <h1>Painel de Análises</h1>
+
+        <p>
+            Explore os resultados das avaliações
+            neuropsicológicas registradas.
+        </p>
+    </div>
+
+</header>
+
+
+<section class="page-container">
+
+    <!-- INDICADORES -->
+    <div class="analysis-dashboard-grid">
+
+        <div class="analysis-summary-card">
+            <span>Avaliações</span>
+            <strong>
+                {{ indicadores.total_avaliacoes }}
+            </strong>
+        </div>
+
+        <div class="analysis-summary-card">
+            <span>Pacientes distintos</span>
+            <strong>
+                {{ indicadores.total_pacientes }}
+            </strong>
+        </div>
+
+        <div class="analysis-summary-card">
+            <span>RAVLT registrado</span>
+            <strong>
+                {{ indicadores.quantidade_testes["RAVLT"] }}
+            </strong>
+        </div>
+
+        <div class="analysis-summary-card">
+            <span>TMT registrado</span>
+            <strong>
+                {{ indicadores.quantidade_testes["TMT"] }}
+            </strong>
+        </div>
+
+        <div class="analysis-summary-card">
+            <span>Fluência registrada</span>
+            <strong>
+                {{ indicadores.quantidade_testes["Fluência Verbal"] }}
+            </strong>
+        </div>
+
+    </div>
+
+    <div class="detail-card analysis-dashboard-section">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Disponibilidade dos resultados</h2>
+
+                <p>
+                    Avaliações com resultados registrados
+                    nos três instrumentos.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="analysis-completeness">
+
+            <div class="analysis-completeness-number">
+
+                <strong>
+                    {{ indicadores.percentual_com_tres_testes }}%
+                </strong>
+
+                <span>
+                    {{ indicadores.total_com_tres_testes }}
+                    de
+                    {{ indicadores.total_avaliacoes }}
+                    avaliações
+                </span>
+
+            </div>
+
+            <div class="analysis-progress">
+
+                <div
+                    class="analysis-progress-fill"
+                    style="width: {{ indicadores.percentual_com_tres_testes }}%;"
+                ></div>
+
+            </div>
+
+            <p>
+                O indicador considera avaliações com
+                pelo menos um resultado registrado
+                em cada instrumento.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- FUNCIONALIDADES -->
+    <div class="analysis-dashboard-heading">
+
+        <div>
+            <p class="page-eyebrow">
+                FERRAMENTAS
+            </p>
+
+            <h2>Explorar análises</h2>
+        </div>
+
+    </div>
+
+    <div class="analysis-tools-grid">
+
+        <a
+            href="{{ url_for('analises.correlacoes') }}"
+            class="analysis-tool-card"
+        >
+            <div class="analysis-tool-icon">↗</div>
+
+            <h3>Correlações</h3>
+
+            <p>
+                Investigue associações entre métricas
+                utilizando Pearson e Spearman.
+            </p>
+
+            <span>Acessar análise →</span>
+        </a>
+
+
+        <a
+            href="{{ url_for('analises.graficos') }}"
+            class="analysis-tool-card"
+        >
+            <div class="analysis-tool-icon">▥</div>
+
+            <h3>Gráficos</h3>
+
+            <p>
+                Explore médias, distribuições
+                e visualizações interativas.
+            </p>
+
+            <span>Visualizar gráficos →</span>
+        </a>
+
+
+        <a
+            href="{{ url_for('analises.agrupamentos') }}"
+            class="analysis-tool-card"
+        >
+            <div class="analysis-tool-icon">◉</div>
+
+            <h3>Identificação de padrões</h3>
+
+            <p>
+                Explore grupos de avaliações com
+                resultados semelhantes usando K-Means.
+            </p>
+
+            <span>Identificar padrões →</span>
+        </a>
+
+    </div>
+
+
+    <!-- GRÁFICO RAVLT -->
+    <div class="detail-card analysis-dashboard-section">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Aprendizagem verbal — RAVLT</h2>
+
+                <p>
+                    Médias das tentativas A1 a A5.
+                </p>
+            </div>
+
+        </div>
+
+        {% if grafico_ravlt %}
+
+            <div class="analysis-chart-container">
+                {{ grafico_ravlt | safe }}
+            </div>
+
+            <div class="analysis-chart-footer">
+                As médias são calculadas com os
+                resultados disponíveis em cada tentativa.
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Ainda não existem resultados RAVLT
+                    para apresentar neste gráfico.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ESTATÍSTICAS DESCRITIVAS -->
+    <div class="analysis-dashboard-heading">
+
+        <div>
+            <p class="page-eyebrow">
+                RESUMO ESTATÍSTICO
+            </p>
+
+            <h2>Estatísticas descritivas</h2>
+
+            <p>
+                Média, mediana e dispersão
+                dos resultados registrados.
+            </p>
+        </div>
+
+    </div>
+
+
+    {% for teste, metricas in estatisticas.items() %}
+
+        <div class="detail-card analysis-statistics-card">
+
+            <div class="detail-card-header">
+                <div>
+                    <h2>{{ teste }}</h2>
+                </div>
+            </div>
+
+            <div class="analysis-table-wrapper">
+
+                <table class="analysis-table">
+
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>N</th>
+                            <th>Média</th>
+                            <th>Mediana</th>
+                            <th>Mínimo</th>
+                            <th>Máximo</th>
+                            <th>Desvio padrão</th>
+                            <th>Variância</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for item in metricas %}
+
+                            <tr>
+
+                                <td class="analysis-metric-name">
+                                    {{ item.metrica }}
+                                </td>
+
+                                <td>{{ item.n }}</td>
+
+                                <td>
+                                    {{ "%.2f"|format(item.media) if item.media is not none else '—' }}
+                                </td>
+
+                                <td>
+                                    {{ "%.2f"|format(item.mediana) if item.mediana is not none else '—' }}
+                                </td>
+
+                                <td>
+                                    {{ "%.2f"|format(item.minimo) if item.minimo is not none else '—' }}
+                                </td>
+
+                                <td>
+                                    {{ "%.2f"|format(item.maximo) if item.maximo is not none else '—' }}
+                                </td>
+
+                                <td>
+                                    {{ "%.2f"|format(item.desvio_padrao) if item.desvio_padrao is not none else '—' }}
+                                </td>
+
+                                <td>
+                                    {{ "%.2f"|format(item.variancia) if item.variancia is not none else '—' }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+
+    <!-- AVALIAÇÕES RECENTES -->
+    <div class="detail-card analysis-dashboard-section">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Avaliações recentes</h2>
+
+                <p>
+                    Últimos registros disponíveis
+                    para análise.
+                </p>
+            </div>
+
+        </div>
+
+        {% if registros_recentes %}
+
+            <div class="analysis-table-wrapper">
+
+                <table class="analysis-table">
+
+                    <thead>
+                        <tr>
+                            <th>Avaliação</th>
+                            <th>Data</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for registro in registros_recentes %}
+
+                            <tr>
+
+                                <td>
+                                    #{{ registro.avaliacao_id }}
+                                </td>
+
+                                <td>
+                                    {{ registro.data_avaliacao }}
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{{ url_for('avaliacoes.visualizar', avaliacao_id=registro.avaliacao_id) }}"
+                                    >
+                                        Visualizar avaliação
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Nenhuma avaliação cadastrada.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

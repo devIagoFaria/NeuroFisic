@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}
+Pacientes | NeuroPsico
+{% endblock %}
+
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <p class="page-eyebrow">
+            PACIENTES
+        </p>
+
+        <h1>Pacientes</h1>
+
+        <p>
+            Gerencie os pacientes cadastrados no sistema.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('pacientes.novo') }}"
+        class="button-primary"
+    >
+
+        <svg viewBox="0 0 24 24" fill="none">
+
+            <path
+                d="M12 5V19M5 12H19"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+            />
+
+        </svg>
+
+        Novo paciente
+
+    </a>
+
+</header>
+
+
+<section class="page-container">
+
+    <div class="table-card">
+
+        {% if pacientes %}
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Data de nascimento</th>
+                        <th>Sexo</th>
+                        <th>Escolaridade</th>
+                        <th>Profissão</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for paciente in pacientes %}
+
+                        <tr>
+
+                            <td class="patient-name">
+                                {{ paciente.nome }}
+                            </td>
+
+                            <td class="table-muted">
+
+                                {{ paciente.data_nascimento.strftime('%d/%m/%Y') }}
+
+                            </td>
+
+                            <td class="table-muted">
+
+                                {{ paciente.sexo or '-' }}
+
+                            </td>
+
+                            <td class="table-muted">
+
+                                {% if paciente.anos_estudo is not none %}
+                                    {{ paciente.anos_estudo }} anos
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+                            <td class="table-muted">
+
+                                {{ paciente.profissao or '-' }}
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{{ url_for('pacientes.visualizar', paciente_id=paciente.id) }}"
+                                    class="table-action"
+                                >
+                                    Visualizar
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+
+            <div class="list-empty">
+
+                <h3>Nenhum paciente cadastrado</h3>
+
+                <p>
+                    Cadastre seu primeiro paciente para começar.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

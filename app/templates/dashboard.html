@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | NeuroPsico
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <p class="page-eyebrow">
+            VISÃO GERAL
+        </p>
+
+        <h1>
+            Olá, {{ current_user.nome }}.
+        </h1>
+
+        <p class="page-description">
+            Acompanhe seus pacientes e avaliações em um só lugar.
+        </p>
+
+    </div>
+
+
+    <a href="{{ url_for('avaliacoes.nova') }}" class="primary-button">
+
+        <svg viewBox="0 0 24 24" fill="none">
+
+            <path
+                d="M12 5V19M5 12H19"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+            />
+
+        </svg>
+
+        Nova avaliação
+
+    </a>
+
+</header>
+
+
+<!-- RESUMO -->
+<section class="stats-grid">
+
+    <!-- PACIENTES -->
+    <article class="stat-card">
+
+        <div class="stat-icon">
+
+            <svg viewBox="0 0 24 24" fill="none">
+
+                <circle
+                    cx="12"
+                    cy="8"
+                    r="3.5"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                />
+
+                <path
+                    d="M5.5 20C5.8 16.5 8.3 14.5 12 14.5C15.7 14.5 18.2 16.5 18.5 20"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                />
+
+            </svg>
+
+        </div>
+
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Pacientes
+            </span>
+
+            <strong>{{ total_pacientes }}</strong>
+
+            <span class="stat-description">
+                pacientes cadastrados
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- AVALIAÇÕES -->
+    <article class="stat-card">
+
+        <div class="stat-icon">
+
+            <svg viewBox="0 0 24 24" fill="none">
+
+                <rect
+                    x="5"
+                    y="4"
+                    width="14"
+                    height="16"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                />
+
+                <path
+                    d="M8 9H16M8 13H16M8 17H13"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                />
+
+            </svg>
+
+        </div>
+
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Avaliações
+            </span>
+
+            <strong>{{ total_avaliacoes }}</strong>
+
+            <span class="stat-description">
+                avaliações registradas
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- ANÁLISES -->
+    <article class="stat-card">
+
+        <div class="stat-icon">
+
+            <svg viewBox="0 0 24 24" fill="none">
+
+                <path
+                    d="M5 18V13M10 18V9M15 18V12M20 18V5"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                />
+
+            </svg>
+
+        </div>
+
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Análises
+            </span>
+
+            <strong>{{ total_analises }}</strong>
+
+            <span class="stat-description">
+                análises realizadas
+            </span>
+
+        </div>
+
+    </article>
+
+</section>
+
+
+<!-- PARTE INFERIOR -->
+<section class="dashboard-grid">
+
+    <!-- AVALIAÇÕES RECENTES -->
+    <div class="panel recent-panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <h2>
+                    Avaliações recentes
+                </h2>
+
+                <p>
+                    Últimas avaliações registradas no sistema.
+                </p>
+
+            </div>
+
+
+            <a href="#" class="text-link">
+                Ver todas
+                <span>→</span>
+            </a>
+
+        </div>
+        
+        {% if avaliacoes_recentes %}
+
+            <div class="recent-evaluations">
+
+                {% for avaliacao in avaliacoes_recentes %}
+
+                    <div class="recent-evaluation-item">
+
+                        <div class="recent-evaluation-info">
+
+                            <strong>
+                                Avaliação #{{ avaliacao.id }}
+                            </strong>
+
+                            <span>
+                                {{ avaliacao.data.strftime('%d/%m/%Y') }}
+                            </span>
+
+                        </div>
+
+                        <a
+                            href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+                            class="text-link"
+                        >
+                            Visualizar →
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h3>
+                    Nenhuma avaliação registrada
+                </h3>
+
+                <p>
+                    Quando uma avaliação for realizada,
+                    ela aparecerá aqui.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+
+    <!-- AÇÕES RÁPIDAS -->
+    <div class="panel quick-panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <h2>
+                    Ações rápidas
+                </h2>
+
+                <p>
+                    Acesse as principais funções.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+            <!-- NOVO PACIENTE -->
+            <a
+                href="{{ url_for('pacientes.novo') }}"
+                class="quick-action"
+            >
+
+                <div class="quick-icon">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <circle
+                            cx="10"
+                            cy="8"
+                            r="3"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                        />
+
+                        <path
+                            d="M4.5 19C4.8 15.8 7 14 10 14"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M17 12V20M13 16H21"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                        />
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Novo paciente
+                    </strong>
+
+                    <span>
+                        Cadastrar um paciente
+                    </span>
+
+                </div>
+
+
+                <span class="action-arrow">
+                    →
+                </span>
+
+            </a>
+
+
+            <!-- NOVA AVALIAÇÃO -->
+            <a href="{{ url_for('avaliacoes.nova') }}" class="quick-action">
+
+                <div class="quick-icon">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <rect
+                            x="5"
+                            y="4"
+                            width="14"
+                            height="16"
+                            rx="2"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                        />
+
+                        <path
+                            d="M12 8V16M8 12H16"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                        />
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Nova avaliação
+                    </strong>
+
+                    <span>
+                        Registrar resultados
+                    </span>
+
+                </div>
+
+
+                <span class="action-arrow">
+                    →
+                </span>
+
+            </a>
+
+
+            <!-- NOVA ANÁLISE -->
+            <a href="#" class="quick-action">
+
+                <div class="quick-icon">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path
+                            d="M5 18V13M10 18V9M15 18V12M20 18V5"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                        />
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Nova análise
+                    </strong>
+
+                    <span>
+                        Explorar associações e padrões
+                    </span>
+
+                </div>
+
+
+                <span class="action-arrow">
+                    →
+                </span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer class="content-footer">
+    NeuroPsico · Sistema de apoio à avaliação neuropsicológica
+</footer>
+
+{% endblock %}

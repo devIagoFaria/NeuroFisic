@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+    {% if paciente %}
+        Editar {{ paciente.nome }} | NeuroPsico
+    {% else %}
+        Novo paciente | NeuroPsico
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <a
+            href="{% if paciente %}
+                    {{ url_for('pacientes.visualizar', paciente_id=paciente.id) }}
+                  {% else %}
+                    {{ url_for('pacientes.listar') }}
+                  {% endif %}"
+            class="back-link"
+        >
+            ← Voltar
+        </a>
+
+
+        <p class="page-eyebrow">
+            PACIENTES
+        </p>
+
+
+        <h1>
+
+            {% if paciente %}
+                Editar paciente
+            {% else %}
+                Novo paciente
+            {% endif %}
+
+        </h1>
+
+
+        <p>
+
+            {% if paciente %}
+                Atualize os dados cadastrais de {{ paciente.nome }}.
+            {% else %}
+                Informe os dados básicos do paciente.
+            {% endif %}
+
+        </p>
+
+    </div>
+
+</header>
+
+
+<section class="page-container">
+
+    <form method="POST" class="form-card">
+
+        <h2 class="form-section-title">
+            Dados pessoais
+        </h2>
+
+
+        <div class="form-grid">
+
+            <!-- NOME -->
+            <div class="form-group full">
+
+                <label for="nome">
+                    Nome completo *
+                </label>
+
+                <input
+                    type="text"
+                    id="nome"
+                    name="nome"
+                    placeholder="Nome completo do paciente"
+                    value="{{ paciente.nome if paciente else '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- DATA DE NASCIMENTO -->
+            <div class="form-group">
+
+                <label for="data_nascimento">
+                    Data de nascimento *
+                </label>
+
+                <input
+                    type="date"
+                    id="data_nascimento"
+                    name="data_nascimento"
+                    value="{{ paciente.data_nascimento.strftime('%Y-%m-%d') if paciente else '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- SEXO -->
+            <div class="form-group">
+
+                <label for="sexo">
+                    Sexo
+                </label>
+
+                <select
+                    id="sexo"
+                    name="sexo"
+                >
+
+                    <option value="">
+                        Selecione
+                    </option>
+
+                    <option
+                        value="Masculino"
+                        {% if paciente and paciente.sexo == "Masculino" %}
+                            selected
+                        {% endif %}
+                    >
+                        Masculino
+                    </option>
+
+                    <option
+                        value="Feminino"
+                        {% if paciente and paciente.sexo == "Feminino" %}
+                            selected
+                        {% endif %}
+                    >
+                        Feminino
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ESTADO CIVIL -->
+            <div class="form-group">
+
+                <label for="estado_civil">
+                    Estado civil
+                </label>
+
+                <select
+                    id="estado_civil"
+                    name="estado_civil"
+                >
+
+                    <option value="">
+                        Selecione
+                    </option>
+
+
+                    <option
+                        value="Solteiro"
+                        {% if paciente and paciente.estado_civil == "Solteiro" %}
+                            selected
+                        {% endif %}
+                    >
+                        Solteiro(a)
+                    </option>
+
+
+                    <option
+                        value="Casado"
+                        {% if paciente and paciente.estado_civil == "Casado" %}
+                            selected
+                        {% endif %}
+                    >
+                        Casado(a)
+                    </option>
+
+
+                    <option
+                        value="Divorciado"
+                        {% if paciente and paciente.estado_civil == "Divorciado" %}
+                            selected
+                        {% endif %}
+                    >
+                        Divorciado(a)
+                    </option>
+
+
+                    <option
+                        value="Viúvo"
+                        {% if paciente and paciente.estado_civil == "Viúvo" %}
+                            selected
+                        {% endif %}
+                    >
+                        Viúvo(a)
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ANOS DE ESTUDO -->
+            <div class="form-group">
+
+                <label for="anos_estudo">
+                    Anos de estudo
+                </label>
+
+                <input
+                    type="number"
+                    id="anos_estudo"
+                    name="anos_estudo"
+                    min="0"
+                    max="40"
+                    placeholder="Ex.: 12"
+                    value="{{ paciente.anos_estudo if paciente and paciente.anos_estudo is not none else '' }}"
+                >
+
+            </div>
+
+
+            <!-- PROFISSÃO -->
+            <div class="form-group">
+
+                <label for="profissao">
+                    Profissão
+                </label>
+
+                <input
+                    type="text"
+                    id="profissao"
+                    name="profissao"
+                    placeholder="Ex.: Professor"
+                    value="{{ paciente.profissao if paciente and paciente.profissao else '' }}"
+                >
+
+            </div>
+
+
+            <!-- OCUPAÇÃO -->
+            <div class="form-group">
+
+                <label for="ocupacao_atual">
+                    Ocupação atual
+                </label>
+
+                <input
+                    type="text"
+                    id="ocupacao_atual"
+                    name="ocupacao_atual"
+                    placeholder="Ex.: Professor universitário"
+                    value="{{ paciente.ocupacao_atual if paciente and paciente.ocupacao_atual else '' }}"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{% if paciente %}
+                        {{ url_for('pacientes.visualizar', paciente_id=paciente.id) }}
+                      {% else %}
+                        {{ url_for('pacientes.listar') }}
+                      {% endif %}"
+                class="button-secondary"
+            >
+                Cancelar
+            </a>
+
+
+            <button
+                type="submit"
+                class="button-primary"
+            >
+
+                {% if paciente %}
+                    Salvar alterações
+                {% else %}
+                    Salvar paciente
+                {% endif %}
+
+            </button>
+
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    </form>
+
+</section>
+
+{% endblock %}

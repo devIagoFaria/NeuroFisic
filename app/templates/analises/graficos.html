@@ -1,0 +1,164 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Gráficos | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+
+    <div>
+
+        <a
+            href="{{ url_for('analises.index') }}"
+            class="back-link"
+        >
+            ← Voltar para análises
+        </a>
+
+        <p class="page-eyebrow">
+            MECANISMO DE ANÁLISE
+        </p>
+
+        <h1>Gráficos e visualizações</h1>
+
+        <p>
+            Explore visualmente os resultados
+            das avaliações neuropsicológicas.
+        </p>
+
+    </div>
+
+</header>
+
+
+<section class="page-container">
+
+    <!-- RAVLT -->
+    <div class="detail-card analysis-chart-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Aprendizagem verbal — RAVLT</h2>
+
+                <p>
+                    Média de palavras recordadas
+                    nas tentativas A1 a A5.
+                </p>
+            </div>
+
+        </div>
+
+        {% if total_ravlt > 0 %}
+
+            <div class="analysis-chart-container">
+                {{ grafico_ravlt | safe }}
+            </div>
+
+            <div class="analysis-chart-footer">
+                As médias são calculadas com os
+                resultados disponíveis em cada tentativa.
+                O tamanho da amostra pode variar.
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Não existem resultados RAVLT
+                    disponíveis para visualização.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- TMT PARTE A -->
+    <div class="detail-card analysis-chart-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Distribuição — TMT Parte A</h2>
+
+                <p>
+                    Distribuição dos tempos de execução
+                    registrados em segundos.
+                </p>
+            </div>
+
+        </div>
+
+        {% if total_tmt_a > 0 %}
+
+            <div class="analysis-chart-container">
+                {{ grafico_tmt_a | safe }}
+            </div>
+
+            <div class="analysis-chart-footer">
+                {{ total_tmt_a }}
+                observações com tempo informado.
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Não existem resultados TMT Parte A
+                    disponíveis para visualização.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- TMT PARTE B -->
+    <div class="detail-card analysis-chart-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <h2>Distribuição — TMT Parte B</h2>
+
+                <p>
+                    Distribuição dos tempos de execução
+                    registrados em segundos.
+                </p>
+            </div>
+
+        </div>
+
+        {% if total_tmt_b > 0 %}
+
+            <div class="analysis-chart-container">
+                {{ grafico_tmt_b | safe }}
+            </div>
+
+            <div class="analysis-chart-footer">
+                {{ total_tmt_b }}
+                observações com tempo informado.
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Não existem resultados TMT Parte B
+                    disponíveis para visualização.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

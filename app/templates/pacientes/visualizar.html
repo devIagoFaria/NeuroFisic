@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ paciente.nome }} | NeuroPsico
+{% endblock %}
+
+
+{% block content %}
+
+<!-- CABEÇALHO -->
+<header class="patient-header">
+
+    <div class="patient-header-main">
+
+        <a
+            href="{{ url_for('pacientes.listar') }}"
+            class="back-link"
+        >
+            ← Voltar para pacientes
+        </a>
+
+        <div class="patient-title">
+
+            <div class="patient-avatar-large">
+                {{ paciente.nome[0] | upper }}
+            </div>
+
+            <div>
+
+                <p class="page-eyebrow">
+                    PACIENTE
+                </p>
+
+                <h1>
+                    {{ paciente.nome }}
+                </h1>
+
+                <p>
+                    Informações cadastrais e histórico de avaliações.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="patient-header-actions">
+
+        <form
+            method="POST"
+            action="{{ url_for('pacientes.excluir', paciente_id=paciente.id) }}"
+            class="delete-form"
+            onsubmit="return confirm('Tem certeza que deseja excluir este paciente? Esta ação não poderá ser desfeita.');"
+        >
+            <button
+                type="submit"
+                class="button-danger"
+            >
+                Excluir
+            </button>
+        </form>
+
+
+        <a
+            href="{{ url_for('pacientes.editar', paciente_id=paciente.id) }}"
+            class="button-secondary"
+        >
+            Editar paciente
+        </a>
+
+
+        <a href="{{ url_for('avaliacoes.nova', paciente_id=paciente.id) }}" class="button-primary" >
+
+            <svg viewBox="0 0 24 24" fill="none">
+
+                <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                />
+
+            </svg>
+
+            Nova avaliação
+
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- CONTEÚDO -->
+<section class="patient-layout">
+
+
+    <!-- COLUNA PRINCIPAL -->
+    <div class="patient-main">
+
+
+        <!-- DADOS PESSOAIS -->
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div>
+
+                    <h2>Dados pessoais</h2>
+
+                    <p>
+                        Informações básicas do paciente.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Nome completo
+                    </span>
+
+                    <strong>
+                        {{ paciente.nome }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Data de nascimento
+                    </span>
+
+                    <strong>
+                        {{ paciente.data_nascimento.strftime('%d/%m/%Y') }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Sexo
+                    </span>
+
+                    <strong>
+                        {{ paciente.sexo or 'Não informado' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Estado civil
+                    </span>
+
+                    <strong>
+                        {{ paciente.estado_civil or 'Não informado' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FORMAÇÃO / OCUPAÇÃO -->
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div>
+
+                    <h2>Escolaridade e ocupação</h2>
+
+                    <p>
+                        Informações educacionais e profissionais.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Anos de estudo
+                    </span>
+
+                    <strong>
+
+                        {% if paciente.anos_estudo is not none %}
+
+                            {{ paciente.anos_estudo }} anos
+
+                        {% else %}
+
+                            Não informado
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Profissão
+                    </span>
+
+                    <strong>
+                        {{ paciente.profissao or 'Não informado' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Ocupação atual
+                    </span>
+
+                    <strong>
+                        {{ paciente.ocupacao_atual or 'Não informado' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- HISTÓRICO -->
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div>
+
+                    <h2>Histórico de avaliações</h2>
+
+                    <p>
+                        Avaliações neuropsicológicas registradas para este paciente.
+                    </p>
+
+                </div>
+
+                <span class="count-badge">
+                    {{ paciente.avaliacoes | length }}
+                </span>
+
+            </div>
+
+
+            {% if paciente.avaliacoes %}
+
+                <div class="evaluation-list">
+
+                    {% for avaliacao in paciente.avaliacoes %}
+
+                        <div class="evaluation-item">
+
+                            <div class="evaluation-date">
+
+                                <span class="evaluation-day">
+                                    {{ avaliacao.data.strftime('%d') }}
+                                </span>
+
+                                <span class="evaluation-month">
+                                    {{ avaliacao.data.strftime('%m/%Y') }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="evaluation-info">
+
+                                <strong>
+                                    Avaliação #{{ avaliacao.id }}
+                                </strong>
+
+                                <span>
+                                    {{ avaliacao.data.strftime('%d/%m/%Y') }}
+                                </span>
+
+                            </div>
+
+
+                            <a
+                                href="{{ url_for('avaliacoes.visualizar', avaliacao_id=avaliacao.id) }}"
+                                class="table-action"
+                            >
+                                Visualizar
+                            </a>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="patient-empty-state">
+
+                    <div class="patient-empty-icon">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <rect
+                                x="5"
+                                y="4"
+                                width="14"
+                                height="16"
+                                rx="2"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                            />
+
+                            <path
+                                d="M8 9H16M8 13H14"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                            />
+
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Nenhuma avaliação registrada
+                    </h3>
+
+                    <p>
+                        Este paciente ainda não possui avaliações
+                        neuropsicológicas registradas.
+                    </p>
+
+                    <a href="#" class="patient-empty-action">
+                        Registrar primeira avaliação →
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- COLUNA LATERAL -->
+    <aside class="patient-sidebar">
+
+
+        <div class="patient-summary-card">
+
+            <span class="summary-label">
+                RESUMO
+            </span>
+
+
+            <div class="summary-row">
+
+                <span>Avaliações</span>
+
+                <strong>
+                    {{ paciente.avaliacoes | length }}
+                </strong>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span>Escolaridade</span>
+
+                <strong>
+
+                    {% if paciente.anos_estudo is not none %}
+
+                        {{ paciente.anos_estudo }} anos
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span>Sexo</span>
+
+                <strong>
+                    {{ paciente.sexo or '—' }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="patient-info-box">
+
+            <div class="info-icon">
+
+                <svg viewBox="0 0 24 24" fill="none">
+
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                    />
+
+                    <path
+                        d="M12 11V16"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                    />
+
+                    <circle
+                        cx="12"
+                        cy="8"
+                        r="1"
+                        fill="currentColor"
+                    />
+
+                </svg>
+
+            </div>
+
+            <p>
+                Os dados registrados no sistema são destinados ao apoio
+                da análise profissional e não representam diagnóstico
+                automatizado.
+            </p>
+
+        </div>
+
+    </aside>
+
+</section>
+
+{% endblock %}

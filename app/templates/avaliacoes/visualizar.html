@@ -1,0 +1,700 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Avaliação #{{ avaliacao.id }} | NeuroPsico
+{% endblock %}
+
+{% block content %}
+
+<!-- CABEÇALHO -->
+<header class="page-header">
+
+    <div>
+        <a
+            href="{{ url_for('avaliacoes.listar') }}"
+            class="back-link"
+        >
+            ← Voltar para avaliações
+        </a>
+
+        <p class="page-eyebrow">
+            AVALIAÇÃO NEUROPSICOLÓGICA
+        </p>
+
+        <h1>{{ avaliacao.paciente.nome }}</h1>
+
+        <p>
+            Avaliação realizada em
+            {{ avaliacao.data.strftime('%d/%m/%Y') }}
+        </p>
+    </div>
+
+    
+    <div class="evaluation-header-actions">
+
+        <a
+            href="{{ url_for('pacientes.visualizar', paciente_id=avaliacao.paciente.id) }}"
+            class="button-secondary"
+        >
+            Ver paciente
+        </a>
+
+        <a
+            href="{{ url_for('avaliacoes.editar', avaliacao_id=avaliacao.id) }}"
+            class="button-primary"
+        >
+            Editar avaliação
+        </a>
+
+        <button
+            type="button"
+            class="button-danger"
+            onclick="abrirModalExclusao()"
+        >
+            Excluir avaliação
+        </button>
+
+    </div>
+
+
+</header>
+
+
+<section class="page-container">
+
+    <!-- RESUMO -->
+    <div class="evaluation-overview">
+
+        <div class="evaluation-overview-header">
+
+            <div>
+                <h2>Resumo da avaliação</h2>
+                <p>
+                    Acompanhe os testes registrados
+                    nesta avaliação.
+                </p>
+            </div>
+
+            <span class="evaluation-progress-badge">
+                {{ total_testes }}/3 testes registrados
+            </span>
+
+        </div>
+
+        <div class="evaluation-overview-grid">
+
+            <div class="evaluation-overview-item">
+
+                <span class="test-status {% if avaliacao.ravlt %}completed{% endif %}">
+                    {% if avaliacao.ravlt %}✓{% else %}○{% endif %}
+                    RAVLT
+                </span>
+
+                <small>
+                    Aprendizagem e memória verbal
+                </small>
+
+            </div>
+
+            <div class="evaluation-overview-item">
+
+                <span class="test-status {% if avaliacao.tmt %}completed{% endif %}">
+                    {% if avaliacao.tmt %}✓{% else %}○{% endif %}
+                    TMT
+                </span>
+
+                <small>
+                    Atenção e flexibilidade cognitiva
+                </small>
+
+            </div>
+
+            <div class="evaluation-overview-item">
+
+                <span class="test-status {% if avaliacao.fluencia_verbal %}completed{% endif %}">
+                    {% if avaliacao.fluencia_verbal %}✓{% else %}○{% endif %}
+                    Fluência Verbal
+                </span>
+
+                <small>
+                    Produção e acesso lexical
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INFORMAÇÕES GERAIS -->
+    <div class="detail-card evaluation-section-card">
+
+        <div class="detail-card-header">
+            <div>
+                <h2>Informações gerais</h2>
+                <p>Dados da avaliação e contexto clínico.</p>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <span class="detail-label">Paciente</span>
+                <strong>{{ avaliacao.paciente.nome }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Data</span>
+                <strong>
+                    {{ avaliacao.data.strftime('%d/%m/%Y') }}
+                </strong>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Profissional</span>
+                <strong>
+                    {{ avaliacao.profissional.nome }}
+                </strong>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Sono na noite anterior</span>
+                <strong>
+                    {% if avaliacao.horas_sono_anterior is not none %}
+                        {{ avaliacao.horas_sono_anterior }} horas
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="evaluation-context">
+
+            <div>
+                <span class="detail-label">Queixa atual</span>
+                <p>
+                    {{ avaliacao.queixa_atual or 'Não informada.' }}
+                </p>
+            </div>
+
+            <div>
+                <span class="detail-label">Observações</span>
+                <p>
+                    {{ avaliacao.observacao or 'Nenhuma observação registrada.' }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RAVLT -->
+    <div class="detail-card evaluation-section-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <p class="page-eyebrow">TESTE 01</p>
+                <h2>RAVLT</h2>
+                <p>Aprendizagem e memória verbal.</p>
+            </div>
+
+            <a
+                href="{{ url_for('ravlt.formulario', avaliacao_id=avaliacao.id) }}"
+                class="button-secondary"
+            >
+                {% if avaliacao.ravlt %}
+                    Editar resultados
+                {% else %}
+                    Registrar resultados
+                {% endif %}
+            </a>
+
+        </div>
+
+        {% if avaliacao.ravlt %}
+
+            {% set ravlt = avaliacao.ravlt %}
+
+            <div class="evaluation-result-content">
+
+                <h3 class="evaluation-result-title">
+                    Aprendizagem — Lista A
+                </h3>
+
+                <div class="evaluation-score-grid">
+
+                    {% for numero in range(1, 6) %}
+
+                        {% set campo = 'quantidade_a' ~ numero %}
+                        {% set valor = ravlt|attr(campo) %}
+
+                        <div class="evaluation-score-item">
+
+                            <span>A{{ numero }}</span>
+
+                            <strong>
+                                {{ valor if valor is not none else '—' }}
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <h3 class="evaluation-result-title">
+                    Interferência e evocação
+                </h3>
+
+                <div class="evaluation-score-grid">
+
+                    {% for campo, titulo in [
+                        ('quantidade_lista_b', 'Lista B'),
+                        ('quantidade_a6', 'A6'),
+                        ('quantidade_a7', 'A7'),
+                        ('reconhecimento', 'Reconhecimento')
+                    ] %}
+
+                        {% set valor = ravlt|attr(campo) %}
+
+                        <div class="evaluation-score-item">
+
+                            <span>{{ titulo }}</span>
+
+                            <strong>
+                                {{ valor if valor is not none else '—' }}
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% if ravlt.observacao %}
+
+                    <div class="evaluation-result-notes">
+                        <span class="detail-label">Observações</span>
+                        <p>{{ ravlt.observacao }}</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Nenhum resultado RAVLT registrado.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- TMT -->
+    <div class="detail-card evaluation-section-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <p class="page-eyebrow">TESTE 02</p>
+                <h2>Trail Making Test (TMT)</h2>
+                <p>Atenção e flexibilidade cognitiva.</p>
+            </div>
+
+            <a
+                href="{{ url_for('tmt.formulario', avaliacao_id=avaliacao.id) }}"
+                class="button-secondary"
+            >
+                {% if avaliacao.tmt %}
+                    Editar resultados
+                {% else %}
+                    Registrar resultados
+                {% endif %}
+            </a>
+
+        </div>
+
+        {% if avaliacao.tmt %}
+
+            {% set tmt = avaliacao.tmt %}
+
+            <div class="evaluation-result-content">
+
+                <div class="evaluation-tmt-grid">
+
+                    <div class="evaluation-tmt-part">
+
+                        <h3>Parte A</h3>
+
+                        <div class="evaluation-tmt-metrics">
+
+                            <div>
+                                <span class="detail-label">
+                                    Tempo
+                                </span>
+
+                                <strong>
+                                    {% if tmt.tempo_a is not none %}
+                                        {{ tmt.tempo_a }} s
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span class="detail-label">
+                                    Erros
+                                </span>
+
+                                <strong>
+                                    {{ tmt.erros_a if tmt.erros_a is not none else '—' }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="evaluation-tmt-part">
+
+                        <h3>Parte B</h3>
+
+                        <div class="evaluation-tmt-metrics">
+
+                            <div>
+                                <span class="detail-label">
+                                    Tempo
+                                </span>
+
+                                <strong>
+                                    {% if tmt.tempo_b is not none %}
+                                        {{ tmt.tempo_b }} s
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span class="detail-label">
+                                    Erros
+                                </span>
+
+                                <strong>
+                                    {{ tmt.erros_b if tmt.erros_b is not none else '—' }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Nenhum resultado TMT registrado.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- FLUÊNCIA VERBAL -->
+    <div class="detail-card evaluation-section-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <p class="page-eyebrow">TESTE 03</p>
+                <h2>Fluência Verbal</h2>
+                <p>Produção e acesso lexical.</p>
+            </div>
+
+            <a
+                href="{{ url_for('fluencia.formulario', avaliacao_id=avaliacao.id) }}"
+                class="button-secondary"
+            >
+                {% if avaliacao.fluencia_verbal %}
+                    Editar resultados
+                {% else %}
+                    Registrar resultados
+                {% endif %}
+            </a>
+
+        </div>
+
+        {% if avaliacao.fluencia_verbal %}
+
+            {% set fluencia = avaliacao.fluencia_verbal %}
+
+            <div class="evaluation-result-content">
+
+                <div class="evaluation-fluency-info">
+
+                    <div>
+                        <span class="detail-label">Tipo</span>
+                        <strong>
+                            {{ fluencia.tipo or 'Não informado' }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span class="detail-label">
+                            Categoria ou letra
+                        </span>
+                        <strong>
+                            {{ fluencia.categoria or 'Não informada' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+                <h3 class="evaluation-result-title">
+                    Resultados gerais
+                </h3>
+
+                <div class="evaluation-score-grid">
+
+                    {% for campo, titulo in [
+                        ('total_palavras', 'Total'),
+                        ('palavras_validas', 'Válidas'),
+                        ('repeticoes', 'Repetições'),
+                        ('intrusoes', 'Intrusões')
+                    ] %}
+
+                        {% set valor = fluencia|attr(campo) %}
+
+                        <div class="evaluation-score-item">
+
+                            <span>{{ titulo }}</span>
+
+                            <strong>
+                                {{ valor if valor is not none else '—' }}
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <h3 class="evaluation-result-title">
+                    Distribuição temporal
+                </h3>
+
+                <div class="evaluation-score-grid">
+
+                    {% for campo, titulo in [
+                        ('intervalo_1', '0–15s'),
+                        ('intervalo_2', '16–30s'),
+                        ('intervalo_3', '31–45s'),
+                        ('intervalo_4', '46–60s')
+                    ] %}
+
+                        {% set valor = fluencia|attr(campo) %}
+
+                        <div class="evaluation-score-item">
+
+                            <span>{{ titulo }}</span>
+
+                            <strong>
+                                {{ valor if valor is not none else '—' }}
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% if fluencia.observacao %}
+
+                    <div class="evaluation-result-notes">
+                        <span class="detail-label">
+                            Observações
+                        </span>
+                        <p>{{ fluencia.observacao }}</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% else %}
+
+            <div class="evaluation-test-empty">
+                <p>
+                    Nenhum resultado de Fluência Verbal registrado.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- MODAL DE EXCLUSÃO -->
+
+<div
+    id="modalExclusao"
+    class="delete-modal-overlay"
+    role="presentation"
+    hidden
+>
+
+    <div
+        class="delete-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalExclusao"
+        aria-describedby="descricaoModalExclusao"
+    >
+
+        <div class="delete-modal-icon">
+            !
+        </div>
+
+        <h2 id="tituloModalExclusao">
+            Excluir avaliação?
+        </h2>
+
+        <p id="descricaoModalExclusao">
+            Você está prestes a excluir a avaliação
+            de <strong>{{ avaliacao.paciente.nome }}</strong>,
+            realizada em
+            <strong>
+                {{ avaliacao.data.strftime('%d/%m/%Y') }}
+            </strong>.
+        </p>
+
+        <p class="delete-modal-warning">
+            Os resultados de RAVLT, TMT e Fluência Verbal
+            associados também serão excluídos.
+            Esta ação não poderá ser desfeita.
+        </p>
+
+        <form
+            method="POST"
+            action="{{ url_for('avaliacoes.excluir', avaliacao_id=avaliacao.id) }}"
+            id="formExclusao"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <input
+                type="hidden"
+                name="confirmacao"
+                value="EXCLUIR"
+            >
+
+            <div class="delete-modal-actions">
+
+                <button
+                    type="button"
+                    class="button-secondary"
+                    onclick="fecharModalExclusao()"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="button-danger"
+                >
+                    Excluir definitivamente
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+    const modalExclusao = document.getElementById(
+        "modalExclusao"
+    );
+
+    let elementoAnterior = null;
+
+    function abrirModalExclusao() {
+        elementoAnterior = document.activeElement;
+        modalExclusao.hidden = false;
+        document.body.style.overflow = "hidden";
+
+        modalExclusao.querySelector(
+            ".button-secondary"
+        ).focus();
+    }
+
+    function fecharModalExclusao() {
+        modalExclusao.hidden = true;
+        document.body.style.overflow = "";
+
+        if (elementoAnterior) {
+            elementoAnterior.focus();
+        }
+    }
+
+    modalExclusao.addEventListener("click", function(event) {
+        if (event.target === modalExclusao) {
+            fecharModalExclusao();
+        }
+    });
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape" && !modalExclusao.hidden) {
+            fecharModalExclusao();
+        }
+
+        if (event.key === "Tab" && !modalExclusao.hidden) {
+            const botoes = Array.from(
+                modalExclusao.querySelectorAll(
+                    "button:not([disabled])"
+                )
+            );
+
+            const primeiro = botoes[0];
+            const ultimo = botoes[botoes.length - 1];
+
+            if (event.shiftKey && document.activeElement === primeiro) {
+                event.preventDefault();
+                ultimo.focus();
+            } else if (!event.shiftKey && document.activeElement === ultimo) {
+                event.preventDefault();
+                primeiro.focus();
+            }
+        }
+    });
+</script>
+
+
+{% endblock %}
